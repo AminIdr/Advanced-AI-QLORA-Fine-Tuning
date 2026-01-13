@@ -1,51 +1,38 @@
-# QLoRA vs Standard Fine-Tuning Comparison
+# QLoRA Fine-Tuning of LLaMA Models: A Performance Analysis
 
-A comprehensive Jupyter notebook comparing **QLoRA** (Quantized Low-Rank Adaptation) with standard full fine-tuning on LLaMA models.
+**Authors:** Amine IDRISSI & Zakaria CHOUKRI
 
-## Overview
+## Project Overview
+This project presents a comprehensive comparative analysis between **Standard Full Fine-Tuning** and **Quantized Low-Rank Adaptation (QLoRA)** applied to Large Language Models (LLMs). 
 
-This project demonstrates how QLoRA achieves significant memory efficiency gains while maintaining model quality through:
-- **4-bit quantization** (NF4 format)
-- **Low-rank adapters** (LoRA)
-- Efficient parameter training
+Using **TinyLlama-1.1B** and the **WikiText-2** dataset, we evaluate the trade-offs between memory efficiency, computational speed, and model quality to determine the viability of training LLMs on consumer-grade hardware.
 
-## Key Metrics
+## Key Results Summary
 
-| Metric | Standard FT | QLoRA | Improvement |
-|--------|-------------|-------|-------------|
-| **Trainable Parameters** | 1.1B | ~12.6M | 99.9% fewer |
-| **Model Size** | 2.1 GB | ~0.6 GB | 3.5x smaller |
-| **Training Speed** | Baseline | Variable | Up to 50% faster |
-| **Inference Speed** | Baseline | Similar | Comparable |
-| **Memory Savings** | - | - | ~71% reduction |
+Our experiments demonstrate that QLoRA achieves a **3.82x memory compression ratio** compared to standard fine-tuning.
 
-## Dataset & Model
+| Metric | Standard Fine-Tuning | QLoRA | Improvement/Impact |
+| :--- | :--- | :--- | :--- |
+| **Model Size** | 2,098 MB | **548 MB** | 🟢 **-73.9% (Memory)** |
+| **Trainable Params** | 1.1 Billion (100%) | **12.6 Million (1.15%)** | 🟢 **-98.85% (Params)** |
+| **Inference Speed** | 33.12 tokens/sec | 10.62 tokens/sec | 🔴 **3.1x Slower** |
+| **Perplexity (Quality)**| 18.42 | 21.87 | 🔴 **+18.73% (Degradation)** |
 
-- **Model**: TinyLlama-1.1B-Chat-v1.0
-- **Dataset**: WikiText-2-raw-v1 (36,718 training samples)
-- **Task**: Autoregressive language modeling
-- **Training Steps**: 500
+## Experimental Setup
 
-## Features
+*   **Model:** TinyLlama-1.1B-Chat-v1.0
+*   **Dataset:** WikiText-2
+*   **QLoRA Configuration:**
+    *   Quantization: 4-bit NormalFloat (NF4) + Double Quantization
+    *   LoRA Rank ($r$): 16
+    *   LoRA Alpha ($\alpha$): 32
+    *   Target Modules: All attention & feed-forward layers
 
-✓ Side-by-side performance benchmarking  
-✓ FLOPS and MFU (Mean FLOPS Utilization) analysis  
-✓ Perplexity and inference time measurements  
-✓ Comprehensive visualization (6-panel comparison + radar chart)  
-✓ Memory compression analysis  
+## Key Observations
 
-## Use Cases
+1.  **Memory Efficiency:** QLoRA makes it possible to fine-tune billion-parameter models on GPUs with limited VRAM (e.g., RTX 3090/4090) by freezing the base model and quantizing it to 4-bit.
+2.  **Inference Latency:** There is a significant speed penalty (3x slower) during inference due to the on-the-fly dequantization overhead.
+3.  **Compute Profile:** QLoRA is memory-bandwidth bound, resulting in lower Mean FLOPS Utilization (MFU) compared to full fine-tuning.
 
-- Fine-tune large models on **consumer GPUs**
-- Reduce **cloud compute costs**
-- Faster **experimentation cycles**
-- Enable **edge deployment**
-
-## Files
-
-- `llama_qlora_finetuning.ipynb` - Main notebook (12 sections, 38 cells)
-- `qlora_comparison.png` - 6-panel comparison charts
-- `qlora_radar.png` - Normalized performance radar chart
-- `qlora_metrics_comparison.csv` - Detailed metrics export
-
-## Requirements
+## Conclusion
+QLoRA is an excellent solution for **research, prototyping, and memory-constrained environments**, democratizing access to LLM training. However, for production deployments requiring real-time low latency or maximum fidelity, standard fine-tuning or post-training quantization is preferred.
